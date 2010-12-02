@@ -1,6 +1,6 @@
 #summary One-sentence summary of this page.
 
-= OpenYouTubeActivity Usage Instructions=
+=!OpenYouTubeActivity Usage Instructions=
 
 There is decent support in Android for media, including video.  If you're looking for an Activity that does the following, then the !OpenYouTubePlayerActivity may be right for you:
 
