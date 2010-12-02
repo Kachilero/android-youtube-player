@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#summary Instructions for using the !OpenYouTubeActivity
 
 =!OpenYouTubeActivity Usage Instructions=
 
