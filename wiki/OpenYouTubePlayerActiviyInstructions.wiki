@@ -24,7 +24,7 @@ The Android activity in this project is meant to be included in your Android pro
 Invoking the activity is easy.  Simply use a code snippet similar to the following:
 
 {{{
-Intent lVideoIntent = new Intent(null, Uri.parse("ytpl://"+YOUTUBE_PLAYLIST_ID), this, IntroVideoActivity.class);
+Intent lVideoIntent = new Intent(null, Uri.parse("ytpl://"+YOUTUBE_PLAYLIST_ID), this, OpenYouTubeActivity.class);
 startActivity(lVideoIntent);
 }}}
 
