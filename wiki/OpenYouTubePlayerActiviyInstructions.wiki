@@ -37,3 +37,11 @@ uses-permission android:name="android.permission.WAKE_LOCK"
 uses-permission android:name="android.permission.INTERNET" 
 uses-permission android:name="android.permission.ACCESS_WIFI_STATE" 
 }}}
+
+There have been some cool observations by other smart people on how to improve the usage of this Activity.  
+  * See [http://it-ride.blogspot.com/2010/04/android-youtube-intent.html this blog post] for how to use the stock YouTube player if available, but fall back to this Activity if it's not.
+  * Scott noticed that you need to add the following to your manifest entry for the Activity:
+
+    {{{
+    android:configChanges="orientation" 
+    }}}
