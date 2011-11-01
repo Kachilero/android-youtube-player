@@ -33,7 +33,6 @@ There is other coniguration that you can do with respect to the messages that ge
 Finally, make sure that you add the following permissions to your manifest:
 
 {{{
-uses-permission android:name="android.permission.WAKE_LOCK" 
 uses-permission android:name="android.permission.INTERNET" 
 uses-permission android:name="android.permission.ACCESS_WIFI_STATE" 
 }}}
