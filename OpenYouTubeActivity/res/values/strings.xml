@@ -2,4 +2,7 @@
 <resources>
     <string name="hello">Hello World, OpenYouTubeActivity!</string>
     <string name="app_name">OpenYouTubeActivity</string>
+    <string name="youtubevideoid">YouTube Video ID</string>
+    <string name="viewVideoButton">View Using OpenYouTubeActivity!</string>
+    <string name="defaultYoutubeVideoId">tzgFuUu0oxg</string>
 </resources>
