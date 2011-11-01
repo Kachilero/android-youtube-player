@@ -13,8 +13,6 @@ import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.TypedValue;
@@ -93,8 +91,6 @@ public class OpenYouTubePlayerActivity extends Activity {
 	
 	static final String YOUTUBE_VIDEO_INFORMATION_URL = "http://www.youtube.com/get_video_info?&video_id=";
 	static final String YOUTUBE_PLAYLIST_ATOM_FEED_URL = "http://gdata.youtube.com/feeds/api/playlists/";
-
-	private static final String TAG_WAKELOCK = "introVideo";
 	
 	protected ProgressBar mProgressBar;
 	protected TextView    mProgressMessage;
@@ -129,9 +125,6 @@ public class OpenYouTubePlayerActivity extends Activity {
 	
 	protected String mVideoId = null;
 	
-	/** The wake lock that keeps the screen on while video is playing */
-	protected WakeLock mWakeLock;
-	
 	@Override
 	protected void onCreate(Bundle pSavedInstanceState) {
 		super.onCreate(pSavedInstanceState);
@@ -145,11 +138,8 @@ public class OpenYouTubePlayerActivity extends Activity {
         // determine the messages to be displayed as the view loads the video
         extractMessages();
 	    
-	    // grab a wake-lock so that the video can play without the screen being turned off
-	    PowerManager lPwrMgr = (PowerManager) getSystemService(POWER_SERVICE);
-		mWakeLock = lPwrMgr.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, TAG_WAKELOCK);
-		mWakeLock.acquire();
-
+	    // set the flag to keep the screen ON so that the video can play without the screen being turned off
+        getWindow().setFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		mProgressBar.bringToFront();
 		mProgressBar.setVisibility(View.VISIBLE);
@@ -291,7 +281,6 @@ public class OpenYouTubePlayerActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		// TODO Auto-generated method stub
 		super.onDestroy();
 		
 		YouTubeUtility.markVideoAsViewed(this, mVideoId);
@@ -304,10 +293,8 @@ public class OpenYouTubePlayerActivity extends Activity {
 			mVideoView.stopPlayback();
 		}
 		
-	    // release wake-lock 
-		if(mWakeLock != null){
-			mWakeLock.release();
-		}
+	    // clear the flag that keeps the screen ON 
+		getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		this.mQueryYouTubeTask = null;
 		this.mVideoView = null;
@@ -395,7 +382,7 @@ public class OpenYouTubePlayerActivity extends Activity {
 
 				////////////////////////////////////
 				// calculate the actual URL of the video, encoded with proper YouTube token
-				lUriStr = YouTubeUtility.calculateYouTubeUrl(lYouTubeFmtQuality, lYouTubeVideoId);
+				lUriStr = YouTubeUtility.calculateYouTubeUrl(lYouTubeFmtQuality, true, lYouTubeVideoId);
 				
 				if(isCancelled())
 					return null;

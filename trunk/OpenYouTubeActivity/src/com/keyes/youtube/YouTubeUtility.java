@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -93,17 +93,18 @@ public class YouTubeUtility {
 	 * requires to play the video.
 	 * 
 	 * @param pYouTubeFmtQuality quality of the video.  17=low, 18=high
+	 * @param bFallback whether to fallback to lower quality in case the supplied quality is not available
 	 * @param pYouTubeVideoId the id of the video
 	 * @return the url string that will retrieve the video
 	 * @throws IOException
 	 * @throws ClientProtocolException
 	 * @throws UnsupportedEncodingException
 	 */
-	public static String calculateYouTubeUrl(String pYouTubeFmtQuality,
+	public static String calculateYouTubeUrl(String pYouTubeFmtQuality, boolean pFallback,
 			String pYouTubeVideoId) throws IOException,
 			ClientProtocolException, UnsupportedEncodingException {
 
-		String lUriStr;
+		String lUriStr = null;
 		HttpClient lClient = new DefaultHttpClient();
 		
 		HttpGet lGetMethod = new HttpGet(OpenYouTubePlayerActivity.YOUTUBE_VIDEO_INFORMATION_URL + 
@@ -130,9 +131,55 @@ public class YouTubeUtility {
 			}
 		}
 		
-		String lTokenStr = URLDecoder.decode(lArgMap.get("token"));
-
-		lUriStr = "http://www.youtube.com/get_video?video_id="+pYouTubeVideoId+"&t="+URLEncoder.encode(lTokenStr)+"&fmt="+pYouTubeFmtQuality;
+		//Find out the URI string from the parameters
+		
+		//Populate the list of formats for the video
+		String lFmtList = URLDecoder.decode(lArgMap.get("fmt_list"));
+		ArrayList<Format> lFormats = new ArrayList<Format>();
+		if(null != lFmtList){
+			String lFormatStrs[] = lFmtList.split(",");
+			
+			for(String lFormatStr : lFormatStrs){
+				Format lFormat = new Format(lFormatStr);
+				lFormats.add(lFormat);
+			}
+		}
+		
+		//Populate the list of streams for the video
+		String lStreamList = lArgMap.get("url_encoded_fmt_stream_map");
+		if(null != lStreamList){
+			String lStreamStrs[] = lStreamList.split(",");
+			ArrayList<VideoStream> lStreams = new ArrayList<VideoStream>();
+			for(String lStreamStr : lStreamStrs){
+				VideoStream lStream = new VideoStream(lStreamStr);
+				lStreams.add(lStream);
+			}	
+			
+			//Search for the given format in the list of video formats
+			// if it is there, select the corresponding stream
+			// otherwise if fallback is requested, check for next lower format
+			int lFormatId = Integer.parseInt(pYouTubeFmtQuality);
+			
+			Format lSearchFormat = new Format(lFormatId);
+			while(!lFormats.contains(lSearchFormat) && pFallback ){
+				int lOldId = lSearchFormat.getId();
+				int lNewId = getSupportedFallbackId(lOldId);
+				
+				if(lOldId == lNewId){
+					break;
+				}
+				lSearchFormat = new Format(lNewId);
+			}
+			
+			int lIndex = lFormats.indexOf(lSearchFormat);
+			if(lIndex >= 0){
+				VideoStream lSearchStream = lStreams.get(lIndex);
+				lUriStr = lSearchStream.getUrl();
+			}
+			
+		}		
+		//Return the URI string. It may be null if the format (or a fallback format if enabled)
+		// is not found in the list of formats for the video
 		return lUriStr;
 	}
 
@@ -205,5 +252,19 @@ public class YouTubeUtility {
 		
 	}
 	
-	
+	public static int getSupportedFallbackId(int pOldId){
+		final int lSupportedFormatIds[] = {13,  //3GPP (MPEG-4 encoded) Low quality 
+										  17,  //3GPP (MPEG-4 encoded) Medium quality 
+										  18,  //MP4  (H.264 encoded) Normal quality
+										  22,  //MP4  (H.264 encoded) High quality
+										  37   //MP4  (H.264 encoded) High quality
+										  };
+		int lFallbackId = pOldId;
+		for(int i = lSupportedFormatIds.length - 1; i >= 0; i--){
+			if(pOldId == lSupportedFormatIds[i] && i > 0){
+				lFallbackId = lSupportedFormatIds[i-1];
+			}			
+		}
+		return lFallbackId;
+	}
 }
