@@ -330,7 +330,8 @@ public class OpenYouTubePlayerActivity extends Activity {
 		@Override
 		protected Uri doInBackground(YouTubeId... pParams) {
 			String lUriStr = null;
-			String lYouTubeFmtQuality = "17";   // 3gpp medium quality, which should be fast enough to view over EDGE connection
+            String lYouTubeFmtQuality = "22";   //Defaulting to highest quality for box
+			//String lYouTubeFmtQuality = "17";   // 3gpp medium quality, which should be fast enough to view over EDGE connection
 			String lYouTubeVideoId = null;
 			
 			if(isCancelled())
